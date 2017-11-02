@@ -47,7 +47,7 @@ $(function() {
     context.fillStyle = "#AAA";
     context.fillRect(0, 0, canvas.width, canvas.height);
 
-    var data = canvas.toDataURL('image/png');
+    var data = canvas.toDataURL('image/jpg', 1.0);
   }
 
   video.addEventListener('canplay', function(ev){
@@ -69,7 +69,30 @@ $(function() {
     }
   }, false);
 
+  function readable_json(json) {
+    return JSON.stringify(json, function(key, val) {
+      return val.toFixed ? Number(val.toFixed(3)) : val;
+    }, 2);
+  }
+
   function upload(data) {
-    console.log('upload');
+    $.post({
+      url: "/upload-image",
+      data: { 
+        file: data
+      }
+    }).done(function(response) {
+      var json = JSON.parse(response);
+      console.log('image_uploaded', json); 
+      $('#json-result').html('<div class="alert alert-primary" ' +
+           'role="alert">' + json + '</div>');
+    })
+    .fail(function(xhr, textStatus, errorThrown) {
+      console.log('upload error', xhr);
+      console.log('upload error', textStatus);
+      console.log('upload error', errorThrown);
+      $('#json-result').html('<div class="alert alert-danger" ' +
+           'role="alert">Could not get the result.</div>');
+    });
   }
 });

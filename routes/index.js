@@ -31,7 +31,7 @@ var headers = {
 };
 
 router.post('/upload-image', function(req, res, next) {
-  if (!req.files)
+  /* if (!req.files)
     return res.status(400).send('No files were uploaded.');
   var file = req.files.file;
   var path = __dirname + '/../uploads/photo.jpg';
@@ -39,6 +39,18 @@ router.post('/upload-image', function(req, res, next) {
     if (err)
       return res.status(500).send(err);
 
+    request(getOptions(path), function(error, response, body) {
+      res.json(body);
+    });
+  }); */
+  var data_url = req.body.file;
+  var matches = data_url.match(/^data:.+\/(.+);base64,(.*)$/);
+  var ext = matches[1];
+  var base64_data = matches[2];
+  var buffer = new Buffer(base64_data, 'base64');
+
+  var path = __dirname + '/../uploads/photo.' + ext;
+  fs.writeFile(path, buffer, function (err) {
     request(getOptions(path), function(error, response, body) {
       res.json(body);
     });
