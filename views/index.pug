@@ -2,22 +2,13 @@ extends layout
 
 block content
   .container-fluid
-    video
-    canvas
     .row
       .col
-        .progress
-          div(class='progress-bar',
-              role='progressbar'
-              aria-valuenow='0'
-              aria-valuemin='0'
-              aria-valuemax='100')
-
-        div(id='result')
-        button(id='upload-image', class='btn btn-primary btn-lg btn-block') Process 
-          i(class='fa fa-cog', aria-hidden='true')
+        video
+        canvas
         p(id='json-result')
 
 block append javascript_internal
   script(src='/javascripts/internal/media.js', type='text/javascript')
   script(src='/javascripts/internal/camera.js', type='text/javascript')
+  script(src='/javascripts/internal/display_result.js', type='text/javascript')

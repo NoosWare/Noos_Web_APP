@@ -1,3 +1,5 @@
+'use strict'
+
 $(function() {
 
   var streaming = false;
@@ -6,24 +8,18 @@ $(function() {
   var width = 640;   // We will scale the photo width to this
   var height = 0; // This will be computed based on the input stream
   $('video').click(take_picture);
+  $('canvas').click(displayer.show_stream);
   media.get_stream(success_media, error_media);
 
   function success_media(stream) {
     console.log('success_media', stream);
-    // Older browsers may not have srcObject
-    if ("srcObject" in video) {
-      video.srcObject = stream;
-    } else {
-      // Avoid using this in new browsers, as it is going away.
-      video.src = window.URL.createObjectURL(stream);
-    }
-    video.onloadedmetadata = function(e) {
-      video.play();
-    };
+    media.play_stream(video, stream);
   }
 
   function error_media(error) {
-    $('body').html(err.name + ": " + err.message + '<br> Please use firefox, other browser will be maybe supported in a few commits');
+    $('body').html(err.name + ": " + err.message +
+             '<br> Please use firefox, other browser' +
+             ' will be maybe supported in a few commits');
     console.log(err.name + ": " + err.message);
   }
 
@@ -69,28 +65,19 @@ $(function() {
     }
   }, false);
 
-  function readable_json(json) {
-    return JSON.stringify(json, function(key, val) {
-      return val.toFixed ? Number(val.toFixed(3)) : val;
-    }, 2);
-  }
-
   function upload(data) {
     $.post({
       url: "/upload-image",
       data: { 
         file: data
       }
-    }).done(function(response) {
-      var json = JSON.parse(response);
+    }).done(function(json) {
       console.log('image_uploaded', json); 
-      $('#json-result').html('<div class="alert alert-primary" ' +
-           'role="alert">' + json + '</div>');
+      displayer.show_json(json);
+      displayer.show_result(data, json);
     })
     .fail(function(xhr, textStatus, errorThrown) {
-      console.log('upload error', xhr);
-      console.log('upload error', textStatus);
-      console.log('upload error', errorThrown);
+      console.log('upload error', xhr, textStatus, errorThrown);
       $('#json-result').html('<div class="alert alert-danger" ' +
            'role="alert">Could not get the result.</div>');
     });

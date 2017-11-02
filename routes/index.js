@@ -12,15 +12,16 @@ router.get('/upload-image', function(req, res, next) {
 
 var request = require('request');
 var FormData = require('form-data');
+var dataUriToBuffer = require('data-uri-to-buffer');
 var fs = require('fs');
 
-function getOptions(file) {
+function getOptions(buffer, service) {
   return {
-    url: 'http://127.0.0.1:9001/face_detection',
+    url: 'http://127.0.0.1:9001/' + service,
     headers: headers,
     method: 'POST',
     formData: {
-      filename: fs.createReadStream(file)
+      filename: buffer
     }
   }
 }
@@ -31,28 +32,21 @@ var headers = {
 };
 
 router.post('/upload-image', function(req, res, next) {
-  /* if (!req.files)
-    return res.status(400).send('No files were uploaded.');
-  var file = req.files.file;
-  var path = __dirname + '/../uploads/photo.jpg';
-  file.mv(path, function(err) {
-    if (err)
-      return res.status(500).send(err);
-
-    request(getOptions(path), function(error, response, body) {
-      res.json(body);
-    });
-  }); */
   var data_url = req.body.file;
-  var matches = data_url.match(/^data:.+\/(.+);base64,(.*)$/);
-  var ext = matches[1];
-  var base64_data = matches[2];
-  var buffer = new Buffer(base64_data, 'base64');
+  var buffer = dataUriToBuffer(data_url);
 
-  var path = __dirname + '/../uploads/photo.' + ext;
-  fs.writeFile(path, buffer, function (err) {
-    request(getOptions(path), function(error, response, body) {
-      res.json(body);
+  var res_json = {};
+  request(getOptions(buffer, 'face_recognition'), function(error, response, body) {
+
+    res_json.face_recognition = JSON.parse(body);
+    request(getOptions(buffer, 'human_detection'), function(error, response, body) {
+
+      res_json.human_detection = JSON.parse(body);
+      request(getOptions(buffer, 'qr_recognition'), function(error, response, body) {
+
+        res_json.orb_find_objects = JSON.parse(body);
+        res.json(res_json);
+      });
     });
   });
 });
