@@ -10,4 +10,39 @@ router.get('/upload-image', function(req, res, next) {
   res.render('result');
 });
 
+var request = require('request');
+var FormData = require('form-data');
+var fs = require('fs');
+
+function getOptions(file) {
+  return {
+    url: 'http://127.0.0.1:9001/face_detection',
+    headers: headers,
+    method: 'POST',
+    formData: {
+      filename: fs.createReadStream(file)
+    }
+  }
+}
+
+var headers = {
+  'Accept-Token': 'YE6geenfzrFiT88O',
+  'User-Token': 'ericsson_event',
+};
+
+router.post('/upload-image', function(req, res, next) {
+  if (!req.files)
+    return res.status(400).send('No files were uploaded.');
+  var file = req.files.file;
+  var path = __dirname + '/../uploads/photo.jpg';
+  file.mv(path, function(err) {
+    if (err)
+      return res.status(500).send(err);
+
+    request(getOptions(path), function(error, response, body) {
+      res.json(body);
+    });
+  });
+});
+
 module.exports = router;
