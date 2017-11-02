@@ -11,19 +11,22 @@ $(function() {
   $('canvas').click(displayer.show_stream);
   media.get_stream(success_media, error_media);
 
-  function success_media(stream) {
+  function success_media(stream)
+  {
     console.log('success_media', stream);
     media.play_stream(video, stream);
   }
 
-  function error_media(error) {
+  function error_media(error)
+  {
     $('body').html(err.name + ": " + err.message +
              '<br> Please use firefox, other browser' +
              ' will be maybe supported in a few commits');
     console.log(err.name + ": " + err.message);
   }
 
-  function take_picture() {
+  function take_picture()
+  {
     console.log('take_picture');
     var context = canvas.getContext('2d');
     if (width && height) {
@@ -38,7 +41,8 @@ $(function() {
     }
   }
 
-  function clear_photo() {
+  function clear_photo()
+  {
     var context = canvas.getContext('2d');
     context.fillStyle = "#AAA";
     context.fillRect(0, 0, canvas.width, canvas.height);
@@ -46,7 +50,7 @@ $(function() {
     var data = canvas.toDataURL('image/jpg', 1.0);
   }
 
-  video.addEventListener('canplay', function(ev){
+  video.addEventListener('canplay', function(ev) {
     if (!streaming) {
       height = video.videoHeight / (video.videoWidth/width);
 
@@ -65,14 +69,15 @@ $(function() {
     }
   }, false);
 
-  function upload(data) {
+  function upload(data)
+  {
     $.post({
       url: "/upload-image",
       data: { 
         file: data
       }
     }).done(function(json) {
-      console.log('image_uploaded', json); 
+      console.log('image_uploaded', JSON.stringify(json)); 
       displayer.show_json(json);
       displayer.show_result(data, json);
     })
