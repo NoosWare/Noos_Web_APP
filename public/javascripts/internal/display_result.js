@@ -23,12 +23,11 @@ $(function() {
   {
     var x_ratio = canvas_drawing.width / canvas_picture.width;
     var y_ratio = canvas_drawing.height / canvas_picture.height;
-    var x_begin = face.up_left_point.x * x_ratio;
-    var y_begin = face.up_left_point.y * y_ratio;
     ctx.lineWidth = 5;
-    ctx.strokeRect(x_begin, y_begin,
-                   face.down_right_point.x * x_ratio - x_begin,
-                   face.down_right_point.y * y_ratio - y_begin);
+    ctx.strokeRect(face.x * x_ratio,
+                   face.y * y_ratio,
+                   face.width * x_ratio,
+                   face.height * y_ratio);
   }
 
   displayer.draw_video = function()
@@ -44,7 +43,7 @@ $(function() {
   displayer.draw_results = function()
   {
     if (json == undefined) return;
-    var faces = json.face_detection.faces;
+    var faces = json.faces;
     // var human = json.face_recognition.humans; 
     if (faces && faces.length) {
       for (var i = 0; i < faces.length; i++) {
