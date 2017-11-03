@@ -3,23 +3,11 @@
 var displayer = {};
 $(function() {
 
-  function writeMessage(canvas, message) {
-    var context = canvas.getContext('2d');
-    // context.clearRect(0, 0, canvas.width, canvas.height);
-    context.font = '18pt Calibri';
-    context.fillStyle = 'black';
-    context.fillText(message, 10, 25);
+  function construct_line(json, title) {
+    return title + ': ' + json.info +
+           ' (' + Math.floor(json.probability * 100) + '%)';
   }
-
-  function getMousePos(canvas, evt) {
-    var rect = canvas.getBoundingClientRect();
-    return {
-      x: evt.clientX - rect.left,
-      y: evt.clientY - rect.top
-    };
-  }
-
-  function draw_rect(face)
+  function draw_face(face)
   {
     var x_ratio = canvas_drawing.width / canvas_picture.width;
     var y_ratio = canvas_drawing.height / canvas_picture.height;
@@ -28,6 +16,14 @@ $(function() {
                    face.y * y_ratio,
                    face.width * x_ratio,
                    face.height * y_ratio);
+    ctx.font = '18pt Calibri';
+    ctx.fillStyle = 'white';
+    var gender = construct_line(face.gender, 'gender');
+    var age = construct_line(face.age, 'age');
+    var emotion = construct_line(face.emotion, 'emotion');
+    ctx.fillText(gender, (face.x + 5) * x_ratio, (face.y + 15) * y_ratio);
+    ctx.fillText(age, (face.x + 5) * x_ratio, (face.y + 25) * y_ratio);
+    ctx.fillText(emotion, (face.x + 5) * x_ratio, (face.y + 35) * y_ratio);
   }
 
   displayer.draw_video = function()
@@ -35,8 +31,6 @@ $(function() {
     if(video.paused || video.ended) return false;
     ctx.drawImage(video, 0, 0, canvas_drawing.width, canvas_drawing.height);
     displayer.draw_results();
-    var message = 'Mouse position: ' + mousePos.x + ',' + mousePos.y;
-    writeMessage(canvas_drawing, message);
     setTimeout(displayer.draw_video, 20);
   }
 
@@ -47,9 +41,11 @@ $(function() {
     // var human = json.face_recognition.humans; 
     if (faces && faces.length) {
       for (var i = 0; i < faces.length; i++) {
-        draw_rect(faces[i]);
+        draw_face(faces[i]);
       }
     }
+    ctx.fillText('Face + QR codes: ' + json.first_request + 'ms', 5, 25);
+    ctx.fillText('Gender + Age + Expression: ' + json.second_request + 'ms', 5, 45);
   }
 
   displayer.update_json = function(new_json)
@@ -75,10 +71,6 @@ $(function() {
 
   var json = undefined;
 
-  var mousePos;
   $('canvas#drawing').click(displayer.show_json);
   video.addEventListener('play', displayer.draw_video);
-  canvas_drawing.addEventListener('mousemove', function(evt) {
-    mousePos = getMousePos(canvas_drawing, evt);
-  }, false);
 });

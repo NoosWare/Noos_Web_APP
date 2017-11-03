@@ -33,10 +33,11 @@ $(function() {
     } else {
       console.log('getUserMedia is implemented by the browser');
     }
-
+    console.log('calling getUserMedia');
     navigator.mediaDevices.getUserMedia({ audio: true, video: true })
-      .then(success)
-      .catch(error);
+      .then(function(stream) { console.log('success getUserMedia'); success(stream); })
+      .catch(function(err) { console.error('error getUserMedia', err); error(err); });
+    console.log('getUserMedia passed');
   };
 
   media.play_stream = function(video, stream) {
