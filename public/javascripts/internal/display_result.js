@@ -21,23 +21,14 @@ $(function() {
 
   function draw_rect(face)
   {
-    // console.log('picture:', canvas_picture.width, canvas_picture.height);
-    // console.log('drawing:', canvas_drawing.width, canvas_drawing.height);
     var x_ratio = canvas_drawing.width / canvas_picture.width;
     var y_ratio = canvas_drawing.height / canvas_picture.height;
-    var x_begin = Math.floor(face.up_left_point.x * x_ratio);
-    var y_begin = Math.floor(face.up_left_point.y * y_ratio);
-    var x_end = Math.floor(face.down_right_point.x * x_ratio);
-    var y_end = Math.floor(face.down_right_point.y * y_ratio);
+    var x_begin = face.up_left_point.x * x_ratio;
+    var y_begin = face.up_left_point.y * y_ratio;
     ctx.lineWidth = 5;
-    ctx.strokeRect(x_begin, y_begin, x_end - x_begin, y_end - y_begin);
-
-    console.log('ratios', x_ratio, y_ratio);
-    console.log('width test: ', $(window).width(), canvas_drawing.width);
-    console.log('height test: ', $(window).height(), canvas_drawing.height);
-    console.log('begin: ', face.up_left_point.x, face.up_left_point.y,
-                           face.down_right_point.x, face.down_right_point.y);
-    console.log('end: ', x_begin, y_begin, x_end, y_end);
+    ctx.strokeRect(x_begin, y_begin,
+                   face.down_right_point.x * x_ratio - x_begin,
+                   face.down_right_point.y * y_ratio - y_begin);
   }
 
   displayer.draw_video = function()
@@ -60,7 +51,6 @@ $(function() {
         draw_rect(faces[i]);
       }
     }
-
   }
 
   displayer.update_json = function(new_json)
