@@ -36,18 +36,18 @@ router.post('/upload-image', function(req, res, next) {
   var buffer = dataUriToBuffer(data_url);
 
   var res_json = {};
-  request(getOptions(buffer, 'face_recognition'), function(error, response, body) {
+  request(getOptions(buffer, 'face_detection'), function(error, response, body) {
 
-    res_json.face_recognition = JSON.parse(body);
-    request(getOptions(buffer, 'human_detection'), function(error, response, body) {
+    res_json.face_detection = JSON.parse(body);
+    // request(getOptions(buffer, 'human_detection'), function(error, response, body) {
 
-      res_json.human_detection = JSON.parse(body);
-      request(getOptions(buffer, 'qr_recognition'), function(error, response, body) {
+      // res_json.human_detection = JSON.parse(body);
+      // request(getOptions(buffer, 'qr_recognition'), function(error, response, body) {
 
-        res_json.orb_find_objects = JSON.parse(body);
+        // res_json.orb_find_objects = JSON.parse(body);
         res.json(res_json);
-      });
-    });
+      // });
+    // });
   });
 });
 

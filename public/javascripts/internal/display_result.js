@@ -3,58 +3,93 @@
 var displayer = {};
 $(function() {
 
-  var canvas = document.querySelector("canvas");
-  var ctx = canvas.getContext("2d");
-
-  function draw_line(begin, end)
-  {
-    console.log('draw_line', begin, end, canvas.height);
-
-    ctx.moveTo(begin.x, begin.y);
-    ctx.lineTo(end.x, end.y);
-
-    ctx.stroke(); 
+  function writeMessage(canvas, message) {
+    var context = canvas.getContext('2d');
+    // context.clearRect(0, 0, canvas.width, canvas.height);
+    context.font = '18pt Calibri';
+    context.fillStyle = 'black';
+    context.fillText(message, 10, 25);
   }
 
-  function draw_square(top_left, bottom_right)
-  {
-    console.log('draw_square', top_left, bottom_right);
-    // top
-    draw_line(top_left, {"x": bottom_right.x, "y": top_left.y});
-    // right
-    draw_line({"x": bottom_right.x, "y": top_left.y}, bottom_right);
-    // bottom
-    draw_line(bottom_right, {"x": top_left.x, "y": bottom_right.y});
-    // left
-    draw_line({"x": top_left.x, "y": bottom_right.y}, top_left);
+  function getMousePos(canvas, evt) {
+    var rect = canvas.getBoundingClientRect();
+    return {
+      x: evt.clientX - rect.left,
+      y: evt.clientY - rect.top
+    };
   }
 
-  displayer.show_result = function(data, json)
+  function draw_rect(face)
   {
-    $('video').hide();
-    $('canvas').show();
+    // console.log('picture:', canvas_picture.width, canvas_picture.height);
+    // console.log('drawing:', canvas_drawing.width, canvas_drawing.height);
+    var x_ratio = canvas_drawing.width / canvas_picture.width;
+    var y_ratio = canvas_drawing.height / canvas_picture.height;
+    var x_begin = Math.floor(face.up_left_point.x * x_ratio);
+    var y_begin = Math.floor(face.up_left_point.y * y_ratio);
+    var x_end = Math.floor(face.down_right_point.x * x_ratio);
+    var y_end = Math.floor(face.down_right_point.y * y_ratio);
+    ctx.lineWidth = 5;
+    ctx.strokeRect(x_begin, y_begin, x_end - x_begin, y_end - y_begin);
 
-    if (json.face_recognition.faces) {
-      var faces = json.face_recognition.faces;
+    console.log('ratios', x_ratio, y_ratio);
+    console.log('width test: ', $(window).width(), canvas_drawing.width);
+    console.log('height test: ', $(window).height(), canvas_drawing.height);
+    console.log('begin: ', face.up_left_point.x, face.up_left_point.y,
+                           face.down_right_point.x, face.down_right_point.y);
+    console.log('end: ', x_begin, y_begin, x_end, y_end);
+  }
+
+  displayer.draw_video = function()
+  {
+    if(video.paused || video.ended) return false;
+    ctx.drawImage(video, 0, 0, canvas_drawing.width, canvas_drawing.height);
+    displayer.draw_results();
+    var message = 'Mouse position: ' + mousePos.x + ',' + mousePos.y;
+    writeMessage(canvas_drawing, message);
+    setTimeout(displayer.draw_video, 20);
+  }
+
+  displayer.draw_results = function()
+  {
+    if (json == undefined) return;
+    var faces = json.face_detection.faces;
+    // var human = json.face_recognition.humans; 
+    if (faces && faces.length) {
       for (var i = 0; i < faces.length; i++) {
-        var face = faces[i];
-        draw_square(face.rect.up_left_point, face.rect.down_right_point);
+        draw_rect(faces[i]);
       }
     }
+
   }
 
-  displayer.show_json = function(json)
+  displayer.update_json = function(new_json)
   {
-    var transform = {};
+    json = new_json;
+    var html = JSON.stringify(json, null, '\t').replace(/\n/g, '<br>');
+    html = html.replace(/\t/g, '<span style="margin-left: 20px">');
     $('#json-result').html('<div class="alert alert-primary" ' +
-         'role="alert">' + json2html.transform(json, transform) + '</div>');
+         'role="alert">' + html + '</div>');
   }
 
-  displayer.show_stream = function()
+  displayer.show_json = function()
   {
-      $('canvas').hide();
-      $('video').show();
+    $('#json-modal').modal();
   }
 
-  $('canvas').click(displayer.show_stream);
+  var video = document.querySelector('video');
+  var canvas_picture = document.getElementById('picture');
+  var canvas_drawing = document.getElementById('drawing');
+  canvas_drawing.width = $(window).width();
+  canvas_drawing.height = $(window).height();
+  var ctx = canvas_drawing.getContext('2d');
+
+  var json = undefined;
+
+  var mousePos;
+  $('canvas#drawing').click(displayer.show_json);
+  video.addEventListener('play', displayer.draw_video);
+  canvas_drawing.addEventListener('mousemove', function(evt) {
+    mousePos = getMousePos(canvas_drawing, evt);
+  }, false);
 });
