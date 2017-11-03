@@ -6,6 +6,8 @@ $(function() {
   {
     console.log('success_media', stream);
     media.play_stream(video, stream);
+    video.muted = true;
+    video.volume = 0;
   }
 
   function error_media(error)
@@ -51,6 +53,7 @@ $(function() {
       }
 
       video.muted = true;
+      video.volume = 0;
       video.setAttribute('width', width);
       video.setAttribute('height', height);
       canvas.setAttribute('width', width);

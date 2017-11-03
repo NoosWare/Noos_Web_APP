@@ -76,11 +76,12 @@ router.post('/upload-image', function(req, res, next)
   request(get_options(form_data), function(error, response, body) {
     res_json.first_request = Date.now() - before;
     if (error) {
-      console.log('request error:', error);
+      console.error('request error:', error);
       return res.status(500).send({ error: 'error in requesting the platform face_recognition' });
     }
 
     var json = JSON.parse(body);
+    console.log(body);
     var face = biggest_face(json[0].face_detection.faces);
     if (face === undefined) return res.json(res_json);
 
@@ -104,11 +105,12 @@ router.post('/upload-image', function(req, res, next)
         request(get_options(formData), function(error, response, body) {
           res_json.second_request = Date.now() - before;
           if (error) {
-            console.log('request error:', error);
+            console.error('request error:', error);
             return res.status(500).send({ error: 'error in requesting the platform face_expression...' });
           }
 
           var json = JSON.parse(body);
+          console.log(body);
           face.age = select(json[0].age_detection, 'age_range');
           face.gender = select(json[1].gender_detection, 'gender');
           face.emotion = select(json[2].face_expression, 'emotion');
