@@ -7,18 +7,18 @@ var jimp = require('jimp');
 var router = express.Router();
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
+router.get('/', function(req, res, next)
+{
   res.render('index');
 });
 
-function getOptions(buffer, service) {
+function get_options(form_data)
+{
   return {
-    url: 'http://127.0.0.1:9001/' + service,
+    url: 'http://127.0.0.1:9001/vision_batch',
     headers: headers,
     method: 'POST',
-    formData: {
-      filename: buffer
-    }
+    formData: form_data
   }
 }
 
@@ -60,41 +60,61 @@ function select(json, info)
   return {info: good_one[info], "probability": good_one.probability};
 }
 
-router.post('/upload-image', function(req, res, next) {
+router.post('/upload-image', function(req, res, next)
+{
   var data_url = req.body.file;
   var buffer = dataUriToBuffer(data_url);
+  var res_json = {"faces": [], "qr_codes": []};
 
-  var res_json = {};
-  request(getOptions(buffer, 'face_detection'), function(error, response, body) {
-    var face_detection = JSON.parse(body);
-    res_json.faces = [];
-    var face = biggest_face(face_detection.faces);
+  var form_data = {
+      filename: buffer,
+      face_detection: 'test',
+      qr_recognition: 'test' 
+  };
 
+  var before = Date.now();
+  request(get_options(form_data), function(error, response, body) {
+    res_json.first_request = Date.now() - before;
+    if (error) {
+      console.log('request error:', error);
+      return res.status(500).send({ error: 'error in requesting the platform face_recognition' });
+    }
+
+    var json = JSON.parse(body);
+    var face = biggest_face(json[0].face_detection.faces);
     if (face === undefined) return res.json(res_json);
-
 
     jimp.read(buffer)
     .then(function(image) {
       
       image.crop(face.x, face.y, face.width, face.height);
       image.getBuffer(jimp.MIME_JPEG, function (error, cropped_buffer) {
+        if (error) {
+          return res.status(500).send({ error: 'error in getting the buffer of the cropped image' });
+        }
+    
+        var formData = {
+          filename: cropped_buffer,
+          age_detection: '',
+          gender_detection: '',
+          face_expression: ''
+        };
 
-        request(getOptions(cropped_buffer, 'age_detection'), function(error, response, body) {
+        before = Date.now();
+        request(get_options(formData), function(error, response, body) {
+          res_json.second_request = Date.now() - before;
+          if (error) {
+            console.log('request error:', error);
+            return res.status(500).send({ error: 'error in requesting the platform face_expression...' });
+          }
 
-          var age = JSON.parse(body);
-          face.age = select(age, 'age_range');
-          request(getOptions(cropped_buffer, 'gender_detection'), function(error, response, body) {
+          var json = JSON.parse(body);
+          face.age = select(json[0].age_detection, 'age_range');
+          face.gender = select(json[1].gender_detection, 'gender');
+          face.emotion = select(json[2].face_expression, 'emotion');
 
-            var gender = JSON.parse(body);
-            face.gender = select(gender, 'gender');
-            request(getOptions(cropped_buffer, 'face_expression'), function(error, response, body) {
-
-              var emotion = JSON.parse(body);
-              face.emotion = select(emotion, 'emotion');
-              res_json.faces.push(face);
-              res.json(res_json);
-            });
-          });
+          res_json.faces.push(face);
+          res.json(res_json);
         });
       });
     })

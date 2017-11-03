@@ -3,6 +3,7 @@ var media = {};
 
 $(function() {
   media.get_stream = function(success, error) {
+    console.log('get_stream');
     // Older browsers might not implement mediaDevices at all, so we set an empty object first
     if (navigator.mediaDevices === undefined) {
       navigator.mediaDevices = {};
@@ -20,6 +21,7 @@ $(function() {
         // Some browsers just don't implement it - return a rejected promise with an error
         // to keep a consistent interface
         if (!getUserMedia) {
+          console.error('getUserMedia is not implemented in this browser');
           return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
         }
 
@@ -28,6 +30,8 @@ $(function() {
           getUserMedia.call(navigator, constraints, resolve, reject);
         });
       }
+    } else {
+      console.log('getUserMedia is implemented by the browser');
     }
 
     navigator.mediaDevices.getUserMedia({ audio: true, video: true })
@@ -36,8 +40,9 @@ $(function() {
   };
 
   media.play_stream = function(video, stream) {
+    console.log('play_stream');
     // Older browsers may not have srcObject
-    if ("srcObject" in video) {
+    if ('srcObject' in video) {
       video.srcObject = stream;
     } else {
       // Avoid using this in new browsers, as it is going away.

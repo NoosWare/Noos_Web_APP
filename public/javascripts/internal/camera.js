@@ -10,10 +10,9 @@ $(function() {
 
   function error_media(error)
   {
-    $('body').html(err.name + ": " + err.message +
-             '<br> Please use firefox, other browser' +
-             ' will be maybe supported in a few commits');
     console.error(err.name + ": " + err.message, error);
+    $('#error-content').html(err.name + ": " + err.message);
+    $('#error-modal').modal();
   }
 
   function take_picture()
@@ -33,6 +32,8 @@ $(function() {
   function clear_photo()
   {
     console.error('clear_photo');
+    $('#error-content').html('Error: clear_photo called');
+    $('#error-modal').modal();
     context.fillStyle = "#AAA";
     context.fillRect(0, 0, canvas.width, canvas.height);
   }
@@ -72,9 +73,11 @@ $(function() {
       take_picture();
     })
     .fail(function(xhr, textStatus, errorThrown) {
+      $('#error-content').html('<div class="alert alert-danger" ' +
+           'role="alert">Could not get the platform result.</div>');
+      $('#error-modal').modal();
       console.log('upload error', xhr, textStatus, errorThrown);
-      $('#json-result').html('<div class="alert alert-danger" ' +
-           'role="alert">Could not get the result.</div>');
+      $('#json-result').html('');
     });
   }
 

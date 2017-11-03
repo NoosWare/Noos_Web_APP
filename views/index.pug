@@ -8,20 +8,9 @@ block content
         canvas(id='picture')
         canvas(id='drawing')
 
-  div(id='json-modal', class='modal', tabindex='-1', role='dialog')
-    div(class='modal-dialog', role='document')
-      div(class='modal-content')
-        div(class='modal-header')
-          h5(class='modal-title') JSON result
-          button(type='button', class='close', data-dismiss='modal', aria-label='Close')
-            span(aria-hidden='true') &times;
-
-        div(class='modal-body')
-          p(id='json-result')
-
-            div(class='modal-footer')
-              button(type='button', class='btn btn-primary', data-dismiss='modal') Close
-
+  include ./modal
+  +modal('json-modal', 'JSON results', 'json-result')
+  +modal('error-modal', 'ERROR', 'error-content')
 block append javascript_internal
   script(src='/javascripts/internal/media.js', type='text/javascript')
   script(src='/javascripts/internal/camera.js', type='text/javascript')
