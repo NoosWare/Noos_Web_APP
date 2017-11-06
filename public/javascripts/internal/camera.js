@@ -77,9 +77,12 @@ $(function() {
     })
     .fail(function(xhr, textStatus, errorThrown) {
       $('#error-content').html('<div class="alert alert-danger" ' +
-           'role="alert">Could not get the platform result.</div>');
+           'role="alert">Could not get the platform result.<br>' + 
+           errorThrown + '<br>' + xhr.responseText + '</div>');
       $('#error-modal').modal();
-      console.log('upload error', xhr, textStatus, errorThrown);
+      console.log('upload error', xhr);
+      console.log('upload error', textStatus);
+      console.log('upload error', errorThrown);
       $('#json-result').html('');
     });
   }

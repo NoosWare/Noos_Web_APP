@@ -12,12 +12,13 @@ router.get('/', function(req, res, next)
   res.render('index');
 });
 
-function get_options(form_data)
+function get_options(form_data, service)
 {
   return {
-    url: 'http://127.0.0.1:9001/vision_batch',
+    url: 'http://127.0.0.1:9001/' + service,
     headers: headers,
     method: 'POST',
+    // forever: true,
     formData: form_data
   }
 }
@@ -64,16 +65,15 @@ router.post('/upload-image', function(req, res, next)
 {
   var data_url = req.body.file;
   var buffer = dataUriToBuffer(data_url);
-  var res_json = {"faces": [], "qr_codes": []};
+  var res_json = {"faces": []};
 
   var form_data = {
       filename: buffer,
-      face_detection: 'test',
-      qr_recognition: 'test' 
+      face_detection: 'test'
   };
 
   var before = Date.now();
-  request(get_options(form_data), function(error, response, body) {
+  request(get_options(form_data, 'face_detection'), function(error, response, body) {
     res_json.first_request = Date.now() - before;
     if (error) {
       console.error('request error:', error);
@@ -82,7 +82,8 @@ router.post('/upload-image', function(req, res, next)
 
     var json = JSON.parse(body);
     console.log(body);
-    var face = biggest_face(json[0].face_detection.faces);
+    if (!json.faces) return res.status(500).send({ error: 'no faces in the body response' });
+    var face = biggest_face(json.faces);
     if (face === undefined) return res.json(res_json);
 
     jimp.read(buffer)
@@ -94,7 +95,7 @@ router.post('/upload-image', function(req, res, next)
           return res.status(500).send({ error: 'error in getting the buffer of the cropped image' });
         }
     
-        var formData = {
+        form_data = {
           filename: cropped_buffer,
           age_detection: '',
           gender_detection: '',
@@ -102,7 +103,7 @@ router.post('/upload-image', function(req, res, next)
         };
 
         before = Date.now();
-        request(get_options(formData), function(error, response, body) {
+        request(get_options(form_data, 'vision_batch'), function(error, response, body) {
           res_json.second_request = Date.now() - before;
           if (error) {
             console.error('request error:', error);
@@ -110,7 +111,9 @@ router.post('/upload-image', function(req, res, next)
           }
 
           var json = JSON.parse(body);
-          console.log(body);
+          console.log(body + ' ' + response);
+          if (!json[0] || !json[0].age_detection || !json[1].gender_detection || !json[2].face_expression)
+            return res.status(500).send({ error: 'cropped image does not get a good result' });
           face.age = select(json[0].age_detection, 'age_range');
           face.gender = select(json[1].gender_detection, 'gender');
           face.emotion = select(json[2].face_expression, 'emotion');
