@@ -39,11 +39,33 @@ function biggest_face(faces)
     var width = face.down_right_point.x - face.up_left_point.x;
     var height = face.down_right_point.y - face.up_left_point.y;
     if (width > biggest_width) {
-      res = {"x" : face.up_left_point.x, "y": face.up_left_point.y, "width": width, "height": height};
+      res = {"x" : face.up_left_point.x,
+             "y": face.up_left_point.y,
+             "width": width,
+             "height": height};
       biggest_width = width;
     }
   }
+  // var margin = (res.width * 0.5);
+  var margin = 0;
+  console.log(res);
+  res = {"x" : res.x - margin,
+         "y": res.y - margin,
+         "width": res.width + margin * 2,
+         "height": res.height + margin * 2}
+  console.log(res);
   return res;
+}
+
+function resize_detection(img_width, img_height, face)
+{
+    if (face === undefined) return undefined;
+    var res = {};
+    res.x = (face.x < 0) ? 0 : face.x;
+    res.y = (face.y < 0) ? 0 : face.y;
+    res.width = (face.x + face.width > img_width) ? img_width - 1 : face.width;
+    res.height = (face.y + face.height > img_height) ? img_height - 1 : face.height;
+    return res;
 }
 
 function select(json, info)
@@ -76,23 +98,30 @@ router.post('/upload-image', function(req, res, next)
   request(get_options(form_data, 'face_detection'), function(error, response, body) {
     res_json.first_request = Date.now() - before;
     if (error) {
-      console.error('request error:', error);
-      return res.status(500).send({ error: 'error in requesting the platform face_recognition' });
+      console.error('request error on first request:', error);
+      return res.status(500).send({
+        error: 'Error in requesting the platform face_recognition'
+      });
     }
 
     var json = JSON.parse(body);
-    console.log(body);
-    if (!json.faces) return res.status(500).send({ error: 'no faces in the body response' });
+    if (json.faces === undefined)
+      return res.status(500).send({
+        error: 'Error during the face_detection'
+      });
     var face = biggest_face(json.faces);
     if (face === undefined) return res.json(res_json);
 
     jimp.read(buffer)
     .then(function(image) {
-      
+      face = resize_detection(image.bitmap.width, image.bitmap.height, face);
       image.crop(face.x, face.y, face.width, face.height);
       image.getBuffer(jimp.MIME_JPEG, function (error, cropped_buffer) {
         if (error) {
-          return res.status(500).send({ error: 'error in getting the buffer of the cropped image' });
+          console.error('image.getBuffer error', error);
+          return res.status(500).send({
+            error: 'error in getting the buffer of the cropped image'
+          });
         }
     
         form_data = {
@@ -106,14 +135,17 @@ router.post('/upload-image', function(req, res, next)
         request(get_options(form_data, 'vision_batch'), function(error, response, body) {
           res_json.second_request = Date.now() - before;
           if (error) {
-            console.error('request error:', error);
-            return res.status(500).send({ error: 'error in requesting the platform face_expression...' });
+            console.error('request error on second request:', error);
+            return res.status(500).send({
+              error: 'error in requesting the platform face_expression...'
+            });
           }
 
           var json = JSON.parse(body);
-          console.log(body + ' ' + response);
-          if (!json[0] || !json[0].age_detection || !json[1].gender_detection || !json[2].face_expression)
-            return res.status(500).send({ error: 'cropped image does not get a good result' });
+          if (!json[0])
+            return res.status(500).send({
+              error: 'cropped image does not get a good result'
+            });
           face.age = select(json[0].age_detection, 'age_range');
           face.gender = select(json[1].gender_detection, 'gender');
           face.emotion = select(json[2].face_expression, 'emotion');

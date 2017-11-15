@@ -22,8 +22,8 @@ $(function() {
     var age = construct_line(face.age, 'age');
     var emotion = construct_line(face.emotion, 'emotion');
     ctx.fillText(gender, (face.x + 5) * x_ratio, (face.y + 15) * y_ratio);
-    ctx.fillText(age, (face.x + 5) * x_ratio, (face.y + 25) * y_ratio);
-    ctx.fillText(emotion, (face.x + 5) * x_ratio, (face.y + 35) * y_ratio);
+    ctx.fillText(age, (face.x + 5) * x_ratio, (face.y + 30) * y_ratio);
+    ctx.fillText(emotion, (face.x + 5) * x_ratio, (face.y + 45) * y_ratio);
   }
 
   displayer.draw_video = function()
@@ -45,7 +45,7 @@ $(function() {
       }
     }
     ctx.fillText('Face + QR codes: ' + json.first_request + 'ms', 5, 25);
-    ctx.fillText('Gender + Age + Expression: ' + json.second_request + 'ms', 5, 45);
+    ctx.fillText('Gender + Age + Expression: ' + json.second_request + 'ms', 5, 40);
   }
 
   displayer.update_json = function(new_json)
