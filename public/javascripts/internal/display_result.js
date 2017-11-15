@@ -7,6 +7,23 @@ $(function() {
     return title + ': ' + json.info +
            ' (' + Math.floor(json.probability * 100) + '%)';
   }
+
+  function draw_text(ctx, txt, x, y) {
+    ctx.save();
+    var font = '20px Arial';
+    ctx.font = font;
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = 'white';
+
+    var width = ctx.measureText(txt).width;
+    ctx.fillRect(x, y, width, parseInt(font, 10));
+
+    ctx.fillStyle = 'black';
+    ctx.fillText(txt, x, y);
+
+    ctx.restore();
+  }
+
   function draw_face(face)
   {
     var x_ratio = canvas_drawing.width / canvas_picture.width;
@@ -16,14 +33,12 @@ $(function() {
                    face.y * y_ratio,
                    face.width * x_ratio,
                    face.height * y_ratio);
-    ctx.font = '18pt Calibri';
-    ctx.fillStyle = 'white';
-    var gender = construct_line(face.gender, 'gender');
-    var age = construct_line(face.age, 'age');
+    var gender  = construct_line(face.gender,  'gender');
+    var age     = construct_line(face.age,     'age');
     var emotion = construct_line(face.emotion, 'emotion');
-    ctx.fillText(gender, (face.x + 5) * x_ratio, (face.y + 15) * y_ratio);
-    ctx.fillText(age, (face.x + 5) * x_ratio, (face.y + 30) * y_ratio);
-    ctx.fillText(emotion, (face.x + 5) * x_ratio, (face.y + 45) * y_ratio);
+    draw_text(ctx,  gender, face.x * x_ratio, face.y * y_ratio +  0);
+    draw_text(ctx,     age, face.x * x_ratio, face.y * y_ratio + 20);
+    draw_text(ctx, emotion, face.x * x_ratio, face.y * y_ratio + 40);
   }
 
   displayer.draw_video = function()
@@ -44,8 +59,8 @@ $(function() {
         draw_face(faces[i]);
       }
     }
-    ctx.fillText('Face + QR codes: ' + json.first_request + 'ms', 5, 25);
-    ctx.fillText('Gender + Age + Expression: ' + json.second_request + 'ms', 5, 40);
+    draw_text(ctx,            'Face detection: ' + json.first_request  + 'ms', 0, 0);
+    draw_text(ctx, 'Gender + Age + Expression: ' + json.second_request + 'ms', 0, 20);
   }
 
   displayer.update_json = function(new_json)
