@@ -15,7 +15,7 @@ router.get('/', function(req, res, next)
 function get_options(form_data, service)
 {
   return {
-    url: 'http://127.0.0.1:9500/' + service,
+    url: 'http://127.0.0.1:9001/' + service,
     headers: headers,
     method: 'POST',
     // forever: true,
@@ -48,12 +48,10 @@ function biggest_face(faces)
   }
   // var margin = (res.width * 0.5);
   var margin = 0;
-  console.log(res);
   res = {"x" : res.x - margin,
          "y": res.y - margin,
          "width": res.width + margin * 2,
          "height": res.height + margin * 2}
-  console.log(res);
   return res;
 }
 
