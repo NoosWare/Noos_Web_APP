@@ -8,7 +8,8 @@ $(function() {
            ' (' + Math.floor(json.probability * 100) + '%)';
   }
 
-  function draw_text(ctx, txt, x, y) {
+  function draw_text(ctx, txt, x, y, padding) {
+    var padding = padding || 5;
     ctx.save();
     var font = '20px Arial';
     ctx.font = font;
@@ -16,7 +17,10 @@ $(function() {
     ctx.fillStyle = 'white';
 
     var width = ctx.measureText(txt).width;
-    ctx.fillRect(x, y, width, parseInt(font, 10));
+    ctx.fillRect(x - padding, 
+                 y - padding,
+                 width + (padding * 2),
+                 parseInt(font, 10) + (padding * 2));
 
     ctx.fillStyle = 'black';
     ctx.fillText(txt, x, y);
@@ -28,7 +32,7 @@ $(function() {
   {
     var x_ratio = canvas_drawing.width / canvas_picture.width;
     var y_ratio = canvas_drawing.height / canvas_picture.height;
-    ctx.lineWidth = 5;
+    ctx.lineWidth = 10;
     ctx.strokeRect(face.x * x_ratio,
                    face.y * y_ratio,
                    face.width * x_ratio,
@@ -37,8 +41,8 @@ $(function() {
     var age     = construct_line(face.age,     'age');
     var emotion = construct_line(face.emotion, 'emotion');
     draw_text(ctx,  gender, face.x * x_ratio, face.y * y_ratio +  0);
-    draw_text(ctx,     age, face.x * x_ratio, face.y * y_ratio + 20);
-    draw_text(ctx, emotion, face.x * x_ratio, face.y * y_ratio + 40);
+    draw_text(ctx,     age, face.x * x_ratio, face.y * y_ratio + 29);
+    draw_text(ctx, emotion, face.x * x_ratio, face.y * y_ratio + 58);
   }
 
   displayer.draw_video = function()
@@ -59,8 +63,8 @@ $(function() {
         draw_face(faces[i]);
       }
     }
-    draw_text(ctx,            'Face detection: ' + json.first_request  + 'ms', 0, 0);
-    draw_text(ctx, 'Gender + Age + Expression: ' + json.second_request + 'ms', 0, 20);
+    draw_text(ctx,            'Face detection: ' + json.first_request  + 'ms', 0, 5);
+    draw_text(ctx, 'Gender + Age + Expression: ' + json.second_request + 'ms', 0, 34);
   }
 
   displayer.update_json = function(new_json)
