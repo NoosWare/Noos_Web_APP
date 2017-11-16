@@ -10,9 +10,9 @@ $(function() {
     video.volume = 0;
   }
 
-  function error_media(error)
+  function error_media(err)
   {
-    console.error(err.name + ": " + err.message, error);
+    console.error(err.name + ": " + err.message, err);
     $('#error-content').html(err.name + ": " + err.message);
     $('#error-modal').modal();
   }
