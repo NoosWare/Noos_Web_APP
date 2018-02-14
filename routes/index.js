@@ -15,7 +15,7 @@ router.get('/', function(req, res, next)
 function get_options(form_data, service)
 {
   return {
-    url: 'http://127.0.0.1:9500/' + service,
+    url: 'https://demo.noos.cloud:9001/' + service,
     headers: headers,
     method: 'POST',
     // forever: true,
@@ -24,8 +24,8 @@ function get_options(form_data, service)
 }
 
 var headers = {
-  'Accept-Token': 'YE6geenfzrFiT88O',
-  'User-Token': 'ericsson_event',
+  'Accept-Token': 'test_token',
+  'User-Token': 'test',
 };
 
 function biggest_face(faces)
