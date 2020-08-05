@@ -11,7 +11,7 @@
     "data-uri-to-buffer": "^2.0.0",
     "debug": "~2.6.9",
     "express": "^4.16.3",
-    "express-fileupload": "^0.3.0",
+    "express-fileupload": "^1.1.9",
     "jimp": "^0.2.28",
     "morgan": "^1.9.1",
     "pug": "^2.0.3",
