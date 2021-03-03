@@ -14,7 +14,7 @@
     "express-fileupload": "^0.3.0",
     "jimp": "^0.2.28",
     "morgan": "^1.9.1",
-    "pug": "^2.0.3",
+    "pug": "^3.0.1",
     "request": "^2.87.0",
     "serve-favicon": "~2.4.5"
   }
