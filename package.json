@@ -10,7 +10,7 @@
     "cookie-parser": "~1.4.3",
     "data-uri-to-buffer": "^2.0.0",
     "debug": "~2.6.9",
-    "express": "^4.16.3",
+    "express": "^4.17.3",
     "express-fileupload": "^0.3.0",
     "jimp": "^0.2.28",
     "morgan": "^1.9.1",
